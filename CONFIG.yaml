@@ -1,0 +1,53 @@
+# Disease Detection Model Configuration
+
+# Data
+data:
+  data_dir: "data/raw"
+  image_size: 224
+  batch_size: 32
+  num_workers: 4
+  train_val_test_split: [0.70, 0.15, 0.15]
+  augment: true
+
+# Model
+model:
+  architecture: "resnet50"  # resnet50 or mobilenet_v2
+  pretrained: true
+  dropout_rate: 0.3
+
+# Training
+training:
+  num_epochs: 50
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  optimizer: "adam"
+  scheduler: "reduce_on_plateau"
+  loss_function: "crossentropy"
+  device: "auto"  # auto, cuda, or cpu
+  
+  # Scheduler settings
+  scheduler_patience: 5
+  scheduler_factor: 0.5
+
+# Evaluation
+evaluation:
+  metrics:
+    - accuracy
+    - precision
+    - recall
+    - f1
+    - auc_roc
+  cross_validation: false
+  cv_folds: 5
+
+# Output
+output:
+  model_dir: "models"
+  save_best_model: true
+  save_history: true
+  save_config: true
+
+# Inference
+inference:
+  confidence_threshold: 0.5
+  image_size: 224

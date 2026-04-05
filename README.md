@@ -1,4 +1,4 @@
-# Biomed-Passion-Project
+# Exploring Biomedical Engineering: A Passion-Project
 
 ## Description (Original)
 
@@ -21,7 +21,7 @@ But automated cell counters cost $1,000–$6,000. This anemia diagnostic app can
 
 1. Clone the repository.
 2. Install dependencies: `pip install -r requirements.txt`
-3. Run the app: `streamlit run src/app.py`
+3. Run the app: `streamlit run app.py`
 
 ## Usage
 

@@ -3,12 +3,13 @@
 ## Materials Needed:
 - Smartphone with camera
 - Microscope
+-Blood smear sample
 - Tape or clip to hold phone
 - Optional: Phone stand or tripod
 
 ## Steps:
 1. Set up your microscope on a stable surface.
-2. Focus on the sample (yeast suspension, blood smear, or pond water) under low magnification.
+2. Focus on the sample (blood smear slide) under low magnification.
 3. Position your smartphone camera directly above the microscope eyepiece.
 4. Use tape or a clip to secure the phone in place, ensuring the camera lens is centered over the eyepiece.
 5. Adjust the distance so that the sample fills the camera view without distortion.

@@ -35,4 +35,4 @@ See [guide/attachable_guide.md](guide/attachable_guide.md) for printable instruc
 - Considering expanding impact by also integrating detection for:
     - infection monitoring (WBC counts)
     - yeast viability for biotechnology
-    - water contamination checks
+    - water contamination checks# ESP32

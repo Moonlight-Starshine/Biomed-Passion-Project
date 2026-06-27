@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import joblib
 
-from build_dataset import extract_features
+from utils.build_dataset import extract_features
 
 model = joblib.load("anemia_model.pkl")
 

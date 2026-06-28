@@ -10,7 +10,7 @@ def download_and_unzip(url, folder_name):
     os.makedirs("dataset", exist_ok=True)
 
     if not os.path.exists(folder_name):
-        zip_path = f"{folder_name}.zip"
+        zip_path = os.path.basename(folder_name) + ".zip"
         print(f"Downloading {folder_name}...")
         response = requests.get(url, stream=True)
         response.raise_for_status()

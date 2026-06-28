@@ -6,7 +6,18 @@ import gdown
 import os
 
 if not os.path.exists("anemia"):
-    gdown.download_folder("https://drive.google.com/drive/folders/16N4vH774U9dshl8y0GhwTWsr0eca4voO", quiet=False)
+    gdown.download_folder(
+        "https://drive.google.com/drive/folders/1sENXyGJ_q4Evqo3cchtMoA9-5b089zEP",
+        quiet=False,
+        use_cookies=False
+    )
+
+if not os.path.exists("normal"):
+    gdown.download_folder(
+        "https://drive.google.com/drive/folders/1PnTpJ18bfJ6LYH4X9r0BXanfy-UvdsYz",
+        quiet=False,
+        use_cookies=False
+    )
     
 from utils.build_dataset import extract_features
 

@@ -18,11 +18,11 @@ def download_and_unzip(url, folder_name):
         os.remove(zip_path)
 
 download_and_unzip(
-    "https://huggingface.co/datasets/urmom1045/independent-anemia-detector/resolve/main/anemia.zip",
+    "https://huggingface.co/datasets/urmom1045/independent-anemia-detector/resolve/main/anemia.zip?download=true",
     "anemia"
 )
 download_and_unzip(
-    "https://huggingface.co/datasets/urmom1045/independent-anemia-detector/resolve/main/normal.zip",
+    "https://huggingface.co/datasets/urmom1045/independent-anemia-detector/resolve/main/normal.zip?download=true",
     "normal"
 )
     

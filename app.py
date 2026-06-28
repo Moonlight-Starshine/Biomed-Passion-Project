@@ -9,21 +9,26 @@ import zipfile
 def download_and_unzip(url, folder_name):
     if not os.path.exists(folder_name):
         zip_path = f"{folder_name}.zip"
+        print(f"Downloading {folder_name}...")
         response = requests.get(url, stream=True)
+        response.raise_for_status()
         with open(zip_path, "wb") as f:
             for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
+                if chunk:
+                    f.write(chunk)
+        print(f"Unzipping {folder_name}...")
         with zipfile.ZipFile(zip_path, "r") as z:
-            z.extractall(".")
+            z.extractall("dataset")
         os.remove(zip_path)
+        print(f"Done: {folder_name}")
 
 download_and_unzip(
     "https://huggingface.co/datasets/urmom1045/independent-anemia-detector/resolve/main/anemia.zip?download=true",
-    "anemia"
+    "dataset/anemia"
 )
 download_and_unzip(
     "https://huggingface.co/datasets/urmom1045/independent-anemia-detector/resolve/main/normal.zip?download=true",
-    "normal"
+    "dataset/normal"
 )
     
 from utils.build_dataset import extract_features

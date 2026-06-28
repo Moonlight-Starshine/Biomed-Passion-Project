@@ -7,6 +7,8 @@ import requests
 import zipfile
 
 def download_and_unzip(url, folder_name):
+    os.makedirs("dataset", exist_ok=True)
+
     if not os.path.exists(folder_name):
         zip_path = f"{folder_name}.zip"
         print(f"Downloading {folder_name}...")

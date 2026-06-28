@@ -2,7 +2,12 @@ import streamlit as st
 import cv2
 import numpy as np
 import joblib
+import gdown
+import os
 
+if not os.path.exists("anemia"):
+    gdown.download_folder("https://drive.google.com/drive/folders/16N4vH774U9dshl8y0GhwTWsr0eca4voO", quiet=False)
+    
 from utils.build_dataset import extract_features
 
 model = joblib.load("anemia_model.pkl")

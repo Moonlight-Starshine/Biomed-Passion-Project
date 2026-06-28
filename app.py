@@ -2,22 +2,29 @@ import streamlit as st
 import cv2
 import numpy as np
 import joblib
-import gdown
 import os
+import requests
+import zipfile
 
-if not os.path.exists("anemia"):
-    gdown.download_folder(
-        "https://drive.google.com/drive/folders/1sENXyGJ_q4Evqo3cchtMoA9-5b089zEP",
-        quiet=False,
-        use_cookies=False
-    )
+def download_and_unzip(url, folder_name):
+    if not os.path.exists(folder_name):
+        zip_path = f"{folder_name}.zip"
+        response = requests.get(url, stream=True)
+        with open(zip_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        with zipfile.ZipFile(zip_path, "r") as z:
+            z.extractall(".")
+        os.remove(zip_path)
 
-if not os.path.exists("normal"):
-    gdown.download_folder(
-        "https://drive.google.com/drive/folders/1PnTpJ18bfJ6LYH4X9r0BXanfy-UvdsYz",
-        quiet=False,
-        use_cookies=False
-    )
+download_and_unzip(
+    "https://huggingface.co/datasets/urmom1045/independent-anemia-detector/resolve/main/anemia.zip",
+    "anemia"
+)
+download_and_unzip(
+    "https://huggingface.co/datasets/urmom1045/independent-anemia-detector/resolve/main/normal.zip",
+    "normal"
+)
     
 from utils.build_dataset import extract_features
 

@@ -70,45 +70,45 @@ def extract_features(img):
         mean_pale_ratio
     ]
 
-
+if __name__ == "__main__":
 # -------------------------------
 # BUILD DATASET
 # -------------------------------
-data = []
-base_path = "dataset"
-
-for label_name in ["anemia", "normal"]:
-    folder = os.path.join(base_path, label_name)
-
-    for file in os.listdir(folder):
-        path = os.path.join(folder, file)
-
-        img = cv2.imread(path)
-        if img is None:
-            continue
-
-        features = extract_features(img)
-        if features is None:
-            continue
-
-        label = 1 if label_name == "anemia" else 0
-        data.append(features + [label])
-
-
-# -------------------------------
-# SAVE CSV
-# -------------------------------
-df = pd.DataFrame(data, columns=[
-    "mean_area",
-    "std_area",
-    "mean_red",
-    "rbc_count",
-    "red_std",
-    "pale_ratio",
-    "label"
-])
-
-df.to_csv("real_dataset.csv", index=False)
-
-print("✅ Dataset created: real_dataset.csv")
-print(df.head())
+    data = []
+    base_path = "dataset"
+    
+    for label_name in ["anemia", "normal"]:
+        folder = os.path.join(base_path, label_name)
+    
+        for file in os.listdir(folder):
+            path = os.path.join(folder, file)
+    
+            img = cv2.imread(path)
+            if img is None:
+                continue
+    
+            features = extract_features(img)
+            if features is None:
+                continue
+    
+            label = 1 if label_name == "anemia" else 0
+            data.append(features + [label])
+    
+    
+    # -------------------------------
+    # SAVE CSV
+    # -------------------------------
+    df = pd.DataFrame(data, columns=[
+        "mean_area",
+        "std_area",
+        "mean_red",
+        "rbc_count",
+        "red_std",
+        "pale_ratio",
+        "label"
+    ])
+    
+    df.to_csv("real_dataset.csv", index=False)
+    
+    print("✅ Dataset created: real_dataset.csv")
+    print(df.head())

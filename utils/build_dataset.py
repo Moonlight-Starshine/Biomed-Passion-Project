@@ -1,5 +1,7 @@
+from importlib.resources import path
 import os
 import cv2
+
 import numpy as np
 import pandas as pd
 
@@ -7,19 +9,36 @@ print("SCRIPT STARTED")
 
 
 def extract_features(img):
-    img = cv2.resize(img, (256, 256))
+    img = cv2.resize(img, (1224, 960))
     img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img_lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+    a_channel = img_lab[:, :, 1]
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     blur = cv2.GaussianBlur(gray, (5,5), 0)
-    _, thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
+    thresh = cv2.adaptiveThreshold(
+        blur, 255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY_INV,
+        blockSize=31,
+        C=5
+    )
+   
+    kernel_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel_close, iterations=1)
+   
+
+    kernel_open = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel_open)
+    
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
+    
     rbc_areas = []
     rbc_red_values = []
     rbc_red_std_values = []
     pale_ratios = []
+    rbc_a_values = []
 
     for c in contours:
         area = cv2.contourArea(c)
@@ -32,6 +51,9 @@ def extract_features(img):
 
             red_channel = img_rgb[:, :, 0]
             pixels = red_channel[mask == 255]
+            a_pixels = a_channel[mask == 255]
+            if len(a_pixels) > 0:
+                rbc_a_values.append(np.mean(a_pixels))
 
             if len(pixels) > 0:
                 # color features
@@ -39,13 +61,15 @@ def extract_features(img):
                 rbc_red_std_values.append(np.std(pixels))
 
                 # pale ratio
-                pale_pixels = np.sum(pixels < 100)
+                threshold = np.percentile(pixels, 25)
+                pale_pixels = np.sum(pixels < threshold)
                 total_pixels = len(pixels)
 
                 if total_pixels > 0:
                     pale_ratio = pale_pixels / total_pixels
                     pale_ratios.append(pale_ratio)
                     
+
 
     print(f"Detected {len(rbc_areas)} cells")
 
@@ -60,14 +84,16 @@ def extract_features(img):
 
     mean_red_std = np.mean(rbc_red_std_values) if rbc_red_std_values else 0
     mean_pale_ratio = np.mean(pale_ratios) if pale_ratios else 0
-
+    mean_a = np.mean(rbc_a_values) if rbc_a_values else 0
+    
     return [
         mean_area,
         std_area,
         mean_red,
         rbc_count,
         mean_red_std,
-        mean_pale_ratio
+        mean_pale_ratio,
+        mean_a
     ]
 
 
@@ -105,6 +131,7 @@ df = pd.DataFrame(data, columns=[
     "rbc_count",
     "red_std",
     "pale_ratio",
+    "mean_a",
     "label"
 ])
 

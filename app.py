@@ -2,8 +2,38 @@ import streamlit as st
 import cv2
 import numpy as np
 import joblib
+import os
+import requests
+import zipfile
 
-from build_dataset import extract_features
+def download_and_unzip(url, folder_name):
+    os.makedirs("dataset", exist_ok=True)
+
+    if not os.path.exists(folder_name):
+        zip_path = os.path.basename(folder_name) + ".zip"
+        print(f"Downloading {folder_name}...")
+        response = requests.get(url, stream=True)
+        response.raise_for_status()
+        with open(zip_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+        print(f"Unzipping {folder_name}...")
+        with zipfile.ZipFile(zip_path, "r") as z:
+            z.extractall("dataset")
+        os.remove(zip_path)
+        print(f"Done: {folder_name}")
+
+download_and_unzip(
+    "https://huggingface.co/datasets/urmom1045/independent-anemia-detector/resolve/main/anemia.zip?download=true",
+    "dataset/anemia"
+)
+download_and_unzip(
+    "https://huggingface.co/datasets/urmom1045/independent-anemia-detector/resolve/main/normal.zip?download=true",
+    "dataset/normal"
+)
+    
+from utils.build_dataset import extract_features
 
 model = joblib.load("anemia_model.pkl")
 
@@ -36,6 +66,7 @@ if camera_image is not None:
         features[1],
         features[2],
         features[3],
+        features[5],
         features[4]
     ]]
 
@@ -75,6 +106,7 @@ if uploaded_file is not None:
             features[1],
             features[2],
             features[3],
+            features[5],
             features[4]
         ]]
 

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { margin: 0; padding: 0; font-family: sans-serif; }
+  #drawCanvas { cursor: crosshair; border: 1px solid #ddd; display: block; }
+  #toolbar { margin-top: 8px; }
+  button {
+    padding: 6px 14px; margin-right: 8px; border-radius: 6px;
+    border: 1px solid #ccc; background: #f0f0f0; cursor: pointer; font-size: 14px;
+  }
+  button:hover { background: #e0e0e0; }
+  #count { font-size: 14px; color: #333; margin-left: 8px; }
+  #statusBox {
+    background: #e5f0ff; color: #333; padding: 8px; border: 1px solid #88a;
+    border-radius: 6px; font-size: 12px; margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+  <div id="statusBox">Loading image...</div>
+  <canvas id="drawCanvas"></canvas>
+  <div id="toolbar">
+    <button id="undoBtn">Undo last box</button>
+    <button id="clearBtn">Clear all</button>
+    <span id="count">0 box(es) drawn</span>
+  </div>
+
+<script>
+  // ---- These three values are baked in by Python before this file is
+  // served -- NOT received via Streamlit's postMessage args channel, which
+  // is what failed in an earlier attempt. This removes that entire
+  // dependency: the moment this page loads, it already has everything it
+  // needs to draw the image, no cross-frame data-passing required for input.
+  const IMAGE_B64 = "__IMAGE_B64__";
+  const CANVAS_WIDTH = __CANVAS_WIDTH__;
+  const CANVAS_HEIGHT = __CANVAS_HEIGHT__;
+
+  const canvas = document.getElementById('drawCanvas');
+  const ctx = canvas.getContext('2d');
+  const countLabel = document.getElementById('count');
+  const statusBox = document.getElementById('statusBox');
+
+  canvas.width = CANVAS_WIDTH;
+  canvas.height = CANVAS_HEIGHT;
+
+  let bgImg = null;
+  let boxes = [];
+  let drawing = false;
+  let startX = 0, startY = 0;
+  let currentBox = null;
+
+  function redraw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (bgImg) {
+      ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+    }
+    ctx.strokeStyle = '#FF0000';
+    ctx.lineWidth = 2;
+    ctx.fillStyle = 'rgba(255, 0, 0, 0.15)';
+    for (const b of boxes) {
+      ctx.fillRect(b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0);
+      ctx.strokeRect(b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0);
+    }
+    if (currentBox) {
+      ctx.fillRect(currentBox.x0, currentBox.y0, currentBox.x1 - currentBox.x0, currentBox.y1 - currentBox.y0);
+      ctx.strokeRect(currentBox.x0, currentBox.y0, currentBox.x1 - currentBox.x0, currentBox.y1 - currentBox.y0);
+    }
+    countLabel.textContent = boxes.length + ' box(es) drawn';
+  }
+
+  function sendMessageToStreamlit(type, data) {
+    const outboundData = Object.assign({ isStreamlitMessage: true, type: type }, data);
+    window.parent.postMessage(outboundData, '*');
+  }
+
+  function sendValue() {
+    sendMessageToStreamlit('streamlit:setComponentValue', { value: boxes });
+  }
+
+  function setFrameHeight() {
+    sendMessageToStreamlit('streamlit:setFrameHeight', { height: canvas.height + 60 });
+  }
+
+  canvas.addEventListener('mousedown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    startX = e.clientX - rect.left;
+    startY = e.clientY - rect.top;
+    drawing = true;
+    currentBox = { x0: startX, y0: startY, x1: startX, y1: startY };
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (!drawing) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    currentBox = {
+      x0: Math.min(startX, x), y0: Math.min(startY, y),
+      x1: Math.max(startX, x), y1: Math.max(startY, y),
+    };
+    redraw();
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!drawing) return;
+    drawing = false;
+    if (currentBox && (currentBox.x1 - currentBox.x0 > 3) && (currentBox.y1 - currentBox.y0 > 3)) {
+      boxes.push(currentBox);
+    }
+    currentBox = null;
+    redraw();
+    sendValue();
+  });
+
+  document.getElementById('undoBtn').addEventListener('click', () => {
+    boxes.pop();
+    redraw();
+    sendValue();
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    boxes = [];
+    redraw();
+    sendValue();
+  });
+
+  // Load the baked-in image immediately -- no waiting on any message from
+  // the parent page.
+  const image = new Image();
+  image.onload = function () {
+    bgImg = image;
+    statusBox.style.display = 'none';
+    redraw();
+    setFrameHeight();
+  };
+  image.onerror = function () {
+    statusBox.style.background = '#ffe5e5';
+    statusBox.style.color = '#a00';
+    statusBox.style.borderColor = '#a00';
+    statusBox.textContent = '⚠️ Image failed to decode (length: ' + IMAGE_B64.length + ' chars).';
+  };
+  image.src = IMAGE_B64;
+
+  sendMessageToStreamlit('streamlit:componentReady', { apiVersion: 1 });
+  setFrameHeight();
+</script>
+</body>
+</html>

@@ -61,3 +61,4 @@ logs/
 Thumbs.db
 *.pkl
 dataset/
+cell_canvas_component/index.html
